@@ -1,0 +1,19 @@
+{
+  "name": "verified-contact-form-functions",
+  "description": "Verified contact form (double opt-in) — Firebase Cloud Functions",
+  "type": "module",
+  "engines": {
+    "node": "22"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "node test-e2e.mjs",
+    "serve": "firebase emulators:start --only functions,firestore",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.3.2"
+  },
+  "private": true
+}

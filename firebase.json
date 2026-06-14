@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/request-verification",
+        "function": { "functionId": "requestVerification", "region": "us-central1" }
+      },
+      {
+        "source": "/api/verify",
+        "function": { "functionId": "verify", "region": "us-central1" }
+      },
+      {
+        "source": "/api/status",
+        "function": { "functionId": "status", "region": "us-central1" }
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

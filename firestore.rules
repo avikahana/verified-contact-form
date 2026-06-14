@@ -1,0 +1,28 @@
+rules_version = '2';
+
+// Verified-contact-form lockdown.
+//
+// All mail flows through Cloud Functions (Admin SDK, which bypasses these
+// rules). The public client must NOT be able to touch any of these collections
+// directly — that is what makes the double-opt-in unbypassable and stops the
+// `messages` outbox from ever being an open relay.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // The Trigger Email extension's outbox. Only Cloud Functions write here.
+    match /messages/{doc} {
+      allow read, write: if false;
+    }
+
+    // Held, not-yet-verified submissions. Server-only; auto-expired via the
+    // TTL policy on `expiresAt`.
+    match /pending_messages/{doc} {
+      allow read, write: if false;
+    }
+
+    // Rate-limit counters keyed by IP / target email. Server-only.
+    match /rate_limits/{doc} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Secrets / local env — NEVER commit these (only .env.example)
+.env
+.env.*
+!.env.example
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Logs / OS
+*.log
+.DS_Store

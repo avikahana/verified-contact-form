@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Confirm your message</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <style>
+    :root { --surface:#1b1b1f; --border:#2c2c33; --radius:12px; --shadow:0 14px 40px rgba(0,0,0,.45); --text:#f2f2f2; --muted:#b9b9c2; --accent:#2563eb; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:#131316; color:var(--text); }
+    .verify-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .verify-card { width:100%; max-width:480px; text-align:center; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:48px 36px; }
+    .verify-card h1 { font-size:26px; margin:20px 0 12px; color:var(--text); }
+    .verify-card p { color:var(--muted); font-size:16px; line-height:1.65; margin:0 0 22px; }
+    .verify-icon { font-size:48px; }
+    .btn { display:inline-block; background:var(--accent); color:#fff; text-decoration:none; font-weight:600; padding:12px 22px; border-radius:9px; }
+    .verify-spin { width:50px; height:50px; margin:0 auto; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:vSpin .9s linear infinite; }
+    @keyframes vSpin { to { transform:rotate(360deg); } }
+    .verify-pane { display:none; }
+    .verify-pane.active { display:block; }
+  </style>
+</head>
+<body>
+  <div class="verify-wrap">
+    <div class="verify-card">
+      <div class="verify-pane active" data-pane="loading">
+        <div class="verify-spin"></div>
+        <h1>Confirming&hellip;</h1>
+        <p>Just a moment while we verify your link.</p>
+      </div>
+
+      <div class="verify-pane" data-pane="verified">
+        <div class="verify-icon">&#9989;</div>
+        <h1>Message sent — thank you!</h1>
+        <p>Your email is confirmed and your message is on its way. You can close this tab.</p>
+        <a href="/" class="btn">Back to the site</a>
+      </div>
+
+      <div class="verify-pane" data-pane="expired">
+        <div class="verify-icon">&#9201;</div>
+        <h1>Link expired</h1>
+        <p>This confirmation link has timed out. Head back and send your message again to get a fresh link.</p>
+        <a href="/#contact" class="btn">Send a new message</a>
+      </div>
+
+      <div class="verify-pane" data-pane="already">
+        <div class="verify-icon">&#9989;</div>
+        <h1>Already confirmed</h1>
+        <p>This link was already used — your message has been delivered. Nothing more to do.</p>
+        <a href="/" class="btn">Back to the site</a>
+      </div>
+
+      <div class="verify-pane" data-pane="error">
+        <div class="verify-icon">&#9888;&#65039;</div>
+        <h1>Something went wrong</h1>
+        <p>We couldn't confirm this link. Please head back and try sending your message again.</p>
+        <a href="/#contact" class="btn">Back to the contact form</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var id = params.get("id");
+      var token = params.get("token");
+
+      function show(pane) {
+        document.querySelectorAll(".verify-pane").forEach(function (el) {
+          el.classList.toggle("active", el.dataset.pane === pane);
+        });
+      }
+
+      if (!id || !token) { show("error"); return; }
+
+      // POST-on-load: consuming via POST (not the GET an email client may
+      // prefetch) keeps the single-use token from being burned by scanners.
+      fetch("/api/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id, token: token }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          switch (data.status) {
+            case "verified":
+            case "already":
+              window.location.replace("/?sent=1#contact");
+              break;
+            case "expired": show("expired"); break;
+            default: show("error");
+          }
+        })
+        .catch(function () { show("error"); });
+    })();
+  </script>
+</body>
+</html>
